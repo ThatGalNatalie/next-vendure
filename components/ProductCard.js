@@ -1,9 +1,6 @@
 import React from 'react';
 import { gql } from 'apollo-boost';
-// import { Mutation, Query } from 'react-apollo';
 import { useMutation, useQuery } from '@apollo/react-hooks';
-
-import Link from 'next/link';
 
 import styles from '../styles/ProductCard.module.css';
 
@@ -15,6 +12,8 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+
+import Navbar from '../components/Navbar';
 
 const useStyles = makeStyles({
   root: {
@@ -71,6 +70,7 @@ const GET_ACTIVE_ORDER = gql`
 var s = new Array();
 
 function ProductCard({ productData }) {
+  const [allItems, setAllItems] = React.useState([]);
   const classes = useStyles();
   const { items } = productData.products;
   const { loading, error, data } = useQuery(GET_ACTIVE_ORDER);
@@ -90,7 +90,7 @@ function ProductCard({ productData }) {
     },
     onCompleted: () => {
       s.push(data);
-      console.log(s);
+      setAllItems(s);
     },
   });
 
@@ -104,63 +104,50 @@ function ProductCard({ productData }) {
   };
 
   return (
-    <section className={styles.container}>
-      {items.map((item) => {
-        const imgUrl = item.assets[0].source;
+    <section>
+      <Navbar count={allItems.length} product={allItems} />
+      <section className={styles.container}>
+        {items.map((item) => {
+          const imgUrl = item.assets[0].source;
 
-        return (
-          <div key={item.slug}>
-            <Card className={classes.root}>
-              <CardActionArea>
-                <CardMedia
-                  className={classes.media}
-                  image={imgUrl}
-                  title={item.slug}
-                />
-                <CardContent>
-                  <Typography gutterBottom variant='h5' component='h2'>
-                    {item.name}
-                  </Typography>
-                  <Typography
-                    variant='body2'
-                    color='textSecondary'
-                    component='p'
+          return (
+            <div key={item.slug}>
+              <Card className={classes.root}>
+                <CardActionArea>
+                  <CardMedia
+                    className={classes.media}
+                    image={imgUrl}
+                    title={item.slug}
+                  />
+                  <CardContent>
+                    <Typography gutterBottom variant='h5' component='h2'>
+                      {item.name}
+                    </Typography>
+                    <Typography
+                      variant='body2'
+                      color='textSecondary'
+                      component='p'
+                    >
+                      {item.description}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+                <CardActions>
+                  <Button
+                    variant='outlined'
+                    color='primary'
+                    onClick={() => {
+                      addProduts(item.variants[0].id);
+                    }}
                   >
-                    {item.description}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-              <CardActions>
-                {/* <Button
-                  variant='outlined'
-                  color='primary'
-                  onClick={() => handleAdd(item.variants[0].id)}
-                >
-                  Add To Cart
-                </Button> */}
-
-                <Button
-                  variant='outlined'
-                  color='primary'
-                  onClick={() => {
-                    addProduts(item.variants[0].id);
-                  }}
-                >
-                  Add To Cart
-                </Button>
-
-                {/* <Button variant='outlined' color='primary'>
-                  Add to Cart
-                </Button> */}
-
-                {/* <Button variant='outlined' color='secondary' onClick={checkout}>
-                  Checkout
-                </Button> */}
-              </CardActions>
-            </Card>
-          </div>
-        );
-      })}
+                    Add To Cart
+                  </Button>
+                </CardActions>
+              </Card>
+            </div>
+          );
+        })}
+      </section>
     </section>
   );
 }
